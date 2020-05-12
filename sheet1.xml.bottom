@@ -1,0 +1,9 @@
+  </sheetData>
+  <printOptions headings="false" gridLines="false" gridLinesSet="true" horizontalCentered="false" verticalCentered="false"/>
+  <pageMargins left="0.75" right="0.75" top="1" bottom="1" header="0.511805555555555" footer="0.511805555555555"/>
+  <pageSetup paperSize="9" scale="100" firstPageNumber="0" fitToWidth="1" fitToHeight="1" pageOrder="downThenOver" orientation="portrait" blackAndWhite="false" draft="false" cellComments="none" useFirstPageNumber="false" horizontalDpi="300" verticalDpi="300" copies="1"/>
+  <headerFooter differentFirst="false" differentOddEven="false">
+    <oddHeader/>
+    <oddFooter/>
+  </headerFooter>
+</worksheet>

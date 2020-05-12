@@ -1,0 +1,72 @@
+    <row r="{row}" customFormat="false" ht="15" hidden="false" customHeight="false" outlineLevel="0" collapsed="false">
+      <c r="A{row}" s="8" t="n">
+        <f ca="true" aca="false">(B{row}/86400/1000)+DATE(1970,1,1)</f>
+      </c>
+      <c r="B{row}" s="1" t="n">
+        <v>{Unix_time}</v>
+      </c>
+      <c r="C{row}" s="1" t="n">
+        <f ca="true" aca="false">D{row}/1000</f>
+        <v>0</v>
+      </c>
+      <c r="D{row}" s="9" t="n">
+        <v>{uS}</v>
+      </c>
+      <c r="E{row}" s="9" t="n">
+        <v>{U_L1}</v>
+      </c>
+      <c r="F{row}" s="9" t="n">
+        <v>{I_L1}</v>
+      </c>
+      <c r="G{row}" s="9" t="n">
+        <v>{U_L2}</v>
+      </c>
+      <c r="H{row}" s="9" t="n">
+        <v>{I_L2}</v>
+      </c>
+      <c r="I{row}" s="9" t="n">
+        <v>{U_L3}</v>
+      </c>
+      <c r="J{row}" s="9" t="n">
+        <v>{I_L3}</v>
+      </c>
+      <c r="K{row}" s="9" t="n">
+        <v>{U_L4}</v>
+      </c>
+      <c r="L{row}" s="9" t="n">
+        <v>{I_L4}</v>
+      </c>
+      <c r="M{row}" s="9" t="n">
+        <v>{U_L1L2}</v>
+      </c>
+      <c r="N{row}" s="9" t="n">
+        <v>{U_L2L3}</v>
+      </c>
+      <c r="O{row}" s="9" t="n">
+        <v>{U_L3L1}</v>
+      </c>
+      <c r="P{row}" s="0" t="n">
+        <f ca="true" aca="false">E{row}*F{row}</f>
+      </c>
+      <c r="Q{row}" s="0" t="n">
+        <f ca="true" aca="false">G{row}*H{row}</f>
+      </c>
+      <c r="R{row}" s="0" t="n">
+        <f ca="true" aca="false">I{row}*J{row}</f>
+      </c>
+      <c r="S{row}" s="10" t="n">
+        <f ca="true" aca="false">SUM(P{row}:R{row})</f>
+      </c>
+      <c r="T{row}" s="2" t="n">
+        <f ca="true" aca="false">S{row}/1000</f>
+      </c>
+      <c r="U{row}" s="3" t="n">
+        <f ca="true" aca="false">T{row}/1000</f>
+      </c>
+      <c r="V{row}" s="3" t="n">
+        <v>{freq}</v>
+      </c>
+      <c r="W{row}" s="0" t="n">
+        <v>{count}</v>
+      </c>
+    </row>
