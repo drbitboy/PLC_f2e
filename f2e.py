@@ -140,6 +140,21 @@ def f2e(s_fn_csv_arg=None
        ,s_dn_out_arg=xlsx_dest_dir_default
        ,s_fn_sheet1_xml_arg=None
        ):
+  """
+Convert frequency and voltage data from CSV file to eXcel XLSX format
+
+Arguments:
+
+  s_fn_csv_arg        - Path to input CSV file (optional)
+                        - If not supplied, the user will be prompted,
+                          possibly via GUI file selection dialog (FSD)
+  s_fn_xlsx_arg       - Path to output XLSX file (optional)
+  s_dn_out_arg        - Directory where XLSX file should be written, if
+                        argument s_fn_xlsx_arg was not supplied
+                        - Default is [{0}]
+  s_fn_sheet1_xml_arg - Name of temporary XML file (optional)
+
+  """.format(xlsx_dest_dir_default)
 
   ### Copy arguments to local variables
   (s_fn_csv    ,s_dn_out    ,s_fn_xlsx    ,s_fn_sheet1_xml,) = (
@@ -147,20 +162,24 @@ def f2e(s_fn_csv_arg=None
 
   ### Prompt for missing input CSV filename
   if not s_fn_csv:
+
     if None is system:
+      ### Command line if system module is not present
       sys.stdout.write('Enter source CSV, including any path:  ')
       sys.stdout.flush()
       s_fn_csv = sys.stdin.readline().rstrip()
     else:
+      ### If system module is not present, use FSD
       s_fn_csv = system.file.openFile()
 
+    ### Exit if nothing useful was provided
     if not (s_fn_csv and os.path.isfile(s_fn_csv)):
       sys.stderr.write('CSV file either not found or not provided:  [{0}]\n'.format(s_fn_csv))
       return
 
-  ### Build XLSX filename
-  ### N.B. If input argument is not None or False, it is assumed to
-  ###      include the directory 
+  ### Build default XLSX filename, if s_fn_xlsx_art  was not provided
+  ### N.B. If input argument is provided, it is assumed to include the
+  ###      directory 
   if not s_fn_xlsx:
     s_basename = os.path.basename(s_fn_csv)
     toks = s_basename.split('.')
@@ -172,6 +191,9 @@ def f2e(s_fn_csv_arg=None
   if not s_fn_sheet1_xml:
     s_fn_sheet1_xml = s_fn_xlsx + '.sheet1.xml'
 
+  ### Create sheet 1
+  FREQCSV(s_fn_csv).parse().write_sheet1(s_fn_sheet1_xml)
+
   ### Copy base .ZIP (no_sheet1_template_xlsx.zip) to XLSX
   s_base_zip = os.path.join(f2e_py_dir,'no_sheet1_template_xlsx.zip')
   with open(s_base_zip,'rb') as fbase_zip:
@@ -180,9 +202,6 @@ def f2e(s_fn_csv_arg=None
       while data:
         fxlsx.write(data)
         data = fbase_zip.read()
-
-  ### Create sheet 1
-  FREQCSV(s_fn_csv).parse().write_sheet1(s_fn_sheet1_xml)
 
   ### Add sheet 1 to XLSX ZIP archive file
   import zipfile
