@@ -172,8 +172,8 @@ def f2e(s_fn_csv_arg=None
   if not s_fn_sheet1_xml:
     s_fn_sheet1_xml = s_fn_xlsx + '.sheet1.xml'
 
-  ### Copy base .ZIP (no_sheet1_xlsx.zip) to XLSX
-  s_base_zip = os.path.join(f2e_py_dir,'no_sheet1_xlsx.zip')
+  ### Copy base .ZIP (no_sheet1_template_xlsx.zip) to XLSX
+  s_base_zip = os.path.join(f2e_py_dir,'no_sheet1_template_xlsx.zip')
   with open(s_base_zip,'rb') as fbase_zip:
     with open(s_fn_xlsx,'wb') as fxlsx:
       data = fbase_zip.read()
