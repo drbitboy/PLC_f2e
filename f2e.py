@@ -10,7 +10,7 @@ Usage:
 import os
 import sys
 try: import system
-except: system = False
+except: system = None
 from datetime import datetime,timedelta
 
 ########################################################################
@@ -145,12 +145,12 @@ def f2e(s_fn_csv_arg=None
 
   ### Prompt for missing input CSV filename
   if not s_fn_csv:
-    if system:
-      s_fn_csv = system.file.fileOpen()
-    else:
+    if None is system:
       sys.stdout.write('Enter source CSV, including any path:  ')
       sys.stdout.flush()
       s_fn_csv = sys.stdin.readline().rstrip()
+    else:
+      s_fn_csv = system.file.fileOpen()
 
     if not (s_fn_csv and os.path.isfile(s_fn_csv)):
       sys.stderr.write('CSV file either not found or not provided:  [{0}]\n'.format(s_fn_csv))
