@@ -2,5 +2,4 @@
 
 ### Usage:
 
-    python f2e.py test.csv test.xlsx
-
+    python f2e.py [test_in.csv [test_out.xlsx]]
