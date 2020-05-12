@@ -2,18 +2,39 @@
 
 Usage:
 
-  python f2e.py test.csv test.xlsx
+  python f2e.py [test_in.csv [test_out.xlsx]]
+
+
 
 """
 import os
 import sys
+try: import system
+except: system = False
 from datetime import datetime,timedelta
 
-do_debug = 'DEBUG' in os.environ
+########################################################################
+### Local configuration
+########################################################################
+
+def hdrcvt(s):
+  """Convert 'l1 u' to U_L1, 'l2-l3 t' to 'T_L2L3', etc."""
+  return '{1}_{0}'.format(s[:-1].replace('-',''),s[-1])
+
+### - Destination directory for XLSX product
+### - Directory of this file; used to find templates
+### - Debugging (not used yet)
+xlsx_dest_dir_default = ( os.environ.get('USER','') == 'dad'
+                      and '.'
+                       or 'C:\\Temp\\janit\\converted'
+                        )
 
 f2e_py_dir = os.path.dirname(__file__)
 
-def hdrcvt(s): return '{1}_{0}'.format(s[:-1].replace('-',''),s[-1])
+do_debug = 'DEBUG' in os.environ
+
+########################################################################
+### - Constants, default headers
 
 comma = ','
 days1970 = 25569.0
@@ -22,12 +43,16 @@ lt_hdr_keys = list(map(hdrcvt,lt_hdrs))
 st_hdrs = set(lt_hdrs)
 
 
+########################################################################
 class FREQCSV(object):
+  """Class to parse frequency data in CSV to eXcel .XLSX file"""
 
   def __init__(self,s_fn_csv):
+    """Initialization saves CSV path name"""
     self.s_fn_csv = s_fn_csv
 
   def parse(self):
+    """Parse data from CSV file; return self"""
     time_next,hdr_next = True,True
     self.lt_data_rows = list()
     with open(self.s_fn_csv,'r') as fcsv:
@@ -76,29 +101,30 @@ class FREQCSV(object):
     return self
 
   def write_sheet1(self,fn_sheet1):
+    """Write parsed CSV data to XLSX worksheet as XML"""
 
     ### Read row format statement into string
-    s_row_xml = os.path.join(f2e_py_dir,'sheet1.xml.row')
+    s_row_xml = os.path.join(f2e_py_dir,'sheet1_template.xml.row')
     with open(s_row_xml,'r') as frow:
       s_row = frow.read()
       assert not frow.read()
 
     with open(fn_sheet1,'w') as fsheet:
 
-      ### Copy top of base XML file to sheet XML
-      s_top_xml = os.path.join(f2e_py_dir,'sheet1.xml.top')
+      ### Copy top of base XML file to worksheet XML
+      s_top_xml = os.path.join(f2e_py_dir,'sheet1_template.xml.top')
       with open(s_top_xml,'r') as ftop:
         s_top = ftop.read()
         while s_top:
           fsheet.write(s_top)
           s_top = ftop.read()
 
-      ### Write rows into sheet XML 
+      ### Write rows into worksheet XML 
       for dt in self.lt_data_rows:
         fsheet.write(s_row.format(**dt))
 
-      ### Copy bottom of base XML file to sheet XML
-      s_bottom_xml = os.path.join(f2e_py_dir,'sheet1.xml.bottom')
+      ### Copy bottom of base XML file to worksheet XML
+      s_bottom_xml = os.path.join(f2e_py_dir,'sheet1_template.xml.bottom')
       with open(s_bottom_xml,'r') as fbottom:
         s_bottom = fbottom.read()
         while s_bottom:
@@ -107,9 +133,44 @@ class FREQCSV(object):
 
 
 ########################################################################
-def f2e(s_fn_csv,s_fn_xlsx,s_fn_sheet1='f2e_temp.xml'):
+def f2e(s_fn_csv_arg=None
+       ,s_fn_xlsx_arg=None
+       ,s_dn_out_arg=xlsx_dest_dir_default
+       ,s_fn_sheet1_xml_arg=None
+       ):
 
-  ### Copy base .ZIP, no_sheet1_xlsx.zip, to XLSX
+  ### Copy arguments to local variables
+  (s_fn_csv    ,s_dn_out    ,s_fn_xlsx    ,s_fn_sheet1_xml,) = (
+   s_fn_csv_arg,s_dn_out_arg,s_fn_xlsx_arg,s_fn_sheet1_xml_arg,)
+
+  ### Prompt for missing input CSV filename
+  if not s_fn_csv:
+    if system:
+      s_fn_csv = system.file.fileOpen()
+    else:
+      sys.stdout.write('Enter source CSV, including any path:  ')
+      sys.stdout.flush()
+      s_fn_csv = sys.stdin.readline().rstrip()
+
+    if not (s_fn_csv and os.path.isfile(s_fn_csv)):
+      sys.stderr.write('CSV file either not found or not provided:  [{0}]\n'.format(s_fn_csv))
+      return
+
+  ### Build XLSX filename
+  ### N.B. If input argument is not None or False, it is assumed to
+  ###      include the directory 
+  if not s_fn_xlsx:
+    s_basename = os.path.basename(s_fn_csv)
+    toks = s_basename.split('.')
+    if 1==len(toks): toks.append('xlsx')
+    else           : toks[-1] = 'xlsx'
+    s_fn_xlsx = os.path.join(s_dn_out,'.'.join(toks))
+
+  ### Build temporary XML filename - it will be deleted after
+  if not s_fn_sheet1_xml:
+    s_fn_sheet1_xml = s_fn_xlsx + '.sheet1.xml'
+
+  ### Copy base .ZIP (no_sheet1_xlsx.zip) to XLSX
   s_base_zip = os.path.join(f2e_py_dir,'no_sheet1_xlsx.zip')
   with open(s_base_zip,'rb') as fbase_zip:
     with open(s_fn_xlsx,'wb') as fxlsx:
@@ -119,19 +180,20 @@ def f2e(s_fn_csv,s_fn_xlsx,s_fn_sheet1='f2e_temp.xml'):
         data = fbase_zip.read()
 
   ### Create sheet 1
-  fc = FREQCSV(s_fn_csv).parse()
-  fc.write_sheet1(s_fn_sheet1)
+  FREQCSV(s_fn_csv).parse().write_sheet1(s_fn_sheet1_xml)
 
   ### Add sheet 1 to XLSX ZIP archive file
   import zipfile
   z=zipfile.ZipFile(s_fn_xlsx,'a')
-  z.write(s_fn_sheet1,'xl/worksheets/sheet1.xml')
+  z.write(s_fn_sheet1_xml,'xl/worksheets/sheet1.xml')
   z.close()
 
-  os.unlink(s_fn_sheet1)
-
+  ### Delete Sheet1 XML file
+  if not do_debug: os.unlink(s_fn_sheet1_xml)
 
 
 ########################################################################
-if "__main__" == __name__ and sys.argv[2:]:
-  f2e(sys.argv[1],sys.argv[2])
+if "__main__" == __name__:
+  f2e(s_fn_csv_arg=sys.argv[1:] and sys.argv[1] or None
+     ,s_fn_xlsx_arg=sys.argv[2:] and sys.argv[2] or None
+     )
