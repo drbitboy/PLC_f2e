@@ -2,10 +2,19 @@
 #!/usr/bin/env jython?
 """
 
-Usage:
+Usage (BASH, typical):
 
   python f2e.py [test_in.csv [test_out.xlsx]]
 
+Python/Jython:
+
+  import f2e
+
+  f2e('short_test_in.csv')
+
+  f2e('short_test_in.csv','excel_directory/short_test_out.xlsx')
+
+  ### See method f2e docstring/comments for more details
 
 
 """
@@ -25,7 +34,7 @@ def hdrcvt(s):
 
 ### - Destination directory for XLSX product
 ### - Directory of this file; used to find templates
-### - Debugging (not used yet)
+### - Debugging (if envvar DEBUG exists, XML file will not be deleted)
 xlsx_dest_dir_default = ( os.environ.get('USER','') == 'dad'
                       and '.'
                        or 'C:\\Temp\\janit\\converted'
@@ -55,15 +64,26 @@ class FREQCSV(object):
 
   def parse(self):
     """Parse data from CSV file; return self"""
+
+    ### Booleans indicate what is next in the sequence:
+    ### - Read Event time (first row);
+    ### - Read headers  in a later row, before data
+    ### - Read data
     time_next,hdr_next = True,True
+
+    ### Create list of dicts; each dict contains per-row data
     self.lt_data_rows = list()
+
+    ### Open file
     with open(self.s_fn_csv,'r') as fcsv:
+
       for rawline in fcsv:
+        ### Loop over lines inf file
         rawtoks = rawline.strip().split(comma)
         csvs = list(map(lambda s:s.replace(' ','').upper(),rawtoks))
 
         if time_next:
-          ### Parse Event time
+          ### Step time_next:  parse event time
           assert 'EVENTTIME'==csvs[0]
           assert '.' in csvs[1]
           time_toks = csvs[1].split('.')
@@ -72,21 +92,30 @@ class FREQCSV(object):
           self.unix_time = (datetime.strptime(s_time,'%Y-%m-%d%H:%M:%S.%f')-datetime(1970,1,1)).total_seconds()
           self.unix_time_ms = int(round(self.unix_time * 1e3))
           self.excel_date = days1970 + (self.unix_time / 86400.0)
+          ### Event time is complete; clear bool for next sequence step
           time_next = False
           continue
 
         if hdr_next:
-          ### Parse Headers
+          ### Step hdr_next:  parse Headers; ignore rows until 1 matches
+          ###                 the expected column headers in set st_hdrs
           if set(csvs).intersection(st_hdrs) == st_hdrs:
             self.hdrs = csvs
             self.hdr_keys = list(map(hdrcvt,csvs))
             self.L = len(self.hdr_keys)
+            ### Header is complete; clear bool for next step,
             hdr_next = False
+            ### Initialize per-row incrementing counters
             sheet_row = 2
             uS = 0
             mod100 = 0
           continue
 
+        ### Skip any rows with missing data in any column
+        if self.L > len([None for s in rawtoks[:self.L] if s.strip()]):
+          continue
+
+        ### Parse data rows into dictionary
         dt = dict(zip(self.hdr_keys,rawtoks[:self.L]))
         dt.update(dict(row=sheet_row
                       ,Unix_time=self.unix_time_ms + int(uS / 1000)
@@ -96,11 +125,14 @@ class FREQCSV(object):
                       ))
         self.lt_data_rows.append(dt)
 
+        ### Increment counters
         sheet_row += 1
         uS += 10000
         mod100 = (mod100 + 1) % 100
 
+    ### Return self so FREQCSV(...).parse().write_sheet1(...) will work
     return self
+
 
   def write_sheet1(self,fn_sheet1):
     """Write parsed CSV data to XLSX worksheet as XML"""
@@ -133,6 +165,8 @@ class FREQCSV(object):
           fsheet.write(s_bottom)
           s_bottom = fbottom.read()
 
+### End of class FREQCSV
+######################################################################
 
 ########################################################################
 def f2e(s_fn_csv_arg=None
@@ -155,6 +189,10 @@ Arguments:
   s_fn_sheet1_xml_arg - Name of temporary XML file (optional)
 
   """.format(xlsx_dest_dir_default)
+
+  ######################################################################
+  ### Part 1:  input argument handling
+  ######################################################################
 
   ### Copy arguments to local variables
   (s_fn_csv    ,s_dn_out    ,s_fn_xlsx    ,s_fn_sheet1_xml,) = (
@@ -191,8 +229,16 @@ Arguments:
   if not s_fn_sheet1_xml:
     s_fn_sheet1_xml = s_fn_xlsx + '.sheet1.xml'
 
+  ######################################################################
+  ### Part 2:  parse CSV
+  ######################################################################
+
   ### Create sheet 1
   FREQCSV(s_fn_csv).parse().write_sheet1(s_fn_sheet1_xml)
+
+  ######################################################################
+  ### Part 3:  write XLSX
+  ######################################################################
 
   ### Copy base .ZIP (no_sheet1_template_xlsx.zip) to XLSX
   s_base_zip = os.path.join(f2e_py_dir,'no_sheet1_template_xlsx.zip')
@@ -211,6 +257,9 @@ Arguments:
 
   ### Delete Sheet1 XML file
   if not do_debug: os.unlink(s_fn_sheet1_xml)
+
+  ### End of method f2e
+  ######################################################################
 
 
 ########################################################################
