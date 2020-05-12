@@ -120,7 +120,7 @@ class FREQCSV(object):
       dt.update(dict(row=sheet_row
                     ,Unix_time=self.unix_time_ms + int(uS / 1000)
                     ,uS=uS
-                    ,freq=50
+                    ,freq=dt['F_L1']
                     ,count=mod100+1
                     ))
       self.lt_data_rows.append(dt)
