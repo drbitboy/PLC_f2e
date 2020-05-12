@@ -150,7 +150,7 @@ def f2e(s_fn_csv_arg=None
       sys.stdout.flush()
       s_fn_csv = sys.stdin.readline().rstrip()
     else:
-      s_fn_csv = system.file.fileOpen()
+      s_fn_csv = system.file.openFile()
 
     if not (s_fn_csv and os.path.isfile(s_fn_csv)):
       sys.stderr.write('CSV file either not found or not provided:  [{0}]\n'.format(s_fn_csv))
