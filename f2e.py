@@ -75,60 +75,63 @@ class FREQCSV(object):
     self.lt_data_rows = list()
 
     ### Open file
-    with open(self.s_fn_csv,'r') as fcsv:
+    fcsv = open(self.s_fn_csv,'r')
 
-      for rawline in fcsv:
-        ### Loop over lines inf file
-        rawtoks = rawline.strip().split(comma)
-        csvs = list(map(lambda s:s.replace(' ','').upper(),rawtoks))
+    for rawline in fcsv:
+      ### Loop over lines inf file
+      rawtoks = rawline.strip().split(comma)
+      csvs = list(map(lambda s:s.replace(' ','').upper(),rawtoks))
 
-        if time_next:
-          ### Step time_next:  parse event time
-          assert 'EVENTTIME'==csvs[0]
-          assert '.' in csvs[1]
-          time_toks = csvs[1].split('.')
-          time_toks[-1] = time_toks[-1][:6]
-          s_time = '.'.join(time_toks)
-          self.unix_time = (datetime.strptime(s_time,'%Y-%m-%d%H:%M:%S.%f')-datetime(1970,1,1)).total_seconds()
-          self.unix_time_ms = int(round(self.unix_time * 1e3))
-          self.excel_date = days1970 + (self.unix_time / 86400.0)
-          ### Event time is complete; clear bool for next sequence step
-          time_next = False
-          continue
+      if time_next:
+        ### Step time_next:  parse event time
+        assert 'EVENTTIME'==csvs[0]
+        assert '.' in csvs[1]
+        time_toks = csvs[1].split('.')
+        time_toks[-1] = time_toks[-1][:6]
+        s_time = '.'.join(time_toks)
+        self.unix_time = (datetime.strptime(s_time,'%Y-%m-%d%H:%M:%S.%f')-datetime(1970,1,1)).total_seconds()
+        self.unix_time_ms = int(round(self.unix_time * 1e3))
+        self.excel_date = days1970 + (self.unix_time / 86400.0)
+        ### Event time is complete; clear bool for next sequence step
+        time_next = False
+        continue
 
-        if hdr_next:
-          ### Step hdr_next:  parse Headers; ignore rows until 1 matches
-          ###                 the expected column headers in set st_hdrs
-          if set(csvs).intersection(st_hdrs) == st_hdrs:
-            self.hdrs = csvs
-            self.hdr_keys = list(map(hdrcvt,csvs))
-            self.L = len(self.hdr_keys)
-            ### Header is complete; clear bool for next step,
-            hdr_next = False
-            ### Initialize per-row incrementing counters
-            sheet_row = 2
-            uS = 0
-            mod100 = 0
-          continue
+      if hdr_next:
+        ### Step hdr_next:  parse Headers; ignore rows until 1 matches
+        ###                 the expected column headers in set st_hdrs
+        if set(csvs).intersection(st_hdrs) == st_hdrs:
+          self.hdrs = csvs
+          self.hdr_keys = list(map(hdrcvt,csvs))
+          self.L = len(self.hdr_keys)
+          ### Header is complete; clear bool for next step,
+          hdr_next = False
+          ### Initialize per-row incrementing counters
+          sheet_row = 2
+          uS = 0
+          mod100 = 0
+        continue
 
-        ### Skip any rows with missing data in any column
-        if self.L > len([None for s in rawtoks[:self.L] if s.strip()]):
-          continue
+      ### Skip any rows with missing data in any column
+      if self.L > len([None for s in rawtoks[:self.L] if s.strip()]):
+        continue
 
-        ### Parse data rows into dictionary
-        dt = dict(zip(self.hdr_keys,rawtoks[:self.L]))
-        dt.update(dict(row=sheet_row
-                      ,Unix_time=self.unix_time_ms + int(uS / 1000)
-                      ,uS=uS
-                      ,freq=50
-                      ,count=mod100+1
-                      ))
-        self.lt_data_rows.append(dt)
+      ### Parse data rows into dictionary
+      dt = dict(zip(self.hdr_keys,rawtoks[:self.L]))
+      dt.update(dict(row=sheet_row
+                    ,Unix_time=self.unix_time_ms + int(uS / 1000)
+                    ,uS=uS
+                    ,freq=50
+                    ,count=mod100+1
+                    ))
+      self.lt_data_rows.append(dt)
 
-        ### Increment counters
-        sheet_row += 1
-        uS += 10000
-        mod100 = (mod100 + 1) % 100
+      ### Increment counters
+      sheet_row += 1
+      uS += 10000
+      mod100 = (mod100 + 1) % 100
+
+    ### Close file
+    fcsv.close()
 
     ### Return self so FREQCSV(...).parse().write_sheet1(...) will work
     return self
@@ -139,31 +142,34 @@ class FREQCSV(object):
 
     ### Read row format statement into string
     s_row_xml = os.path.join(f2e_py_dir,'sheet1_template.xml.row')
-    with open(s_row_xml,'r') as frow:
-      s_row = frow.read()
-      assert not frow.read()
+    frow = open(s_row_xml,'r')
+    s_row = frow.read()
+    assert not frow.read()
+    frow.close()
 
-    with open(fn_sheet1,'w') as fsheet:
+    fsheet = open(fn_sheet1,'w')
 
-      ### Copy top of base XML file to worksheet XML
-      s_top_xml = os.path.join(f2e_py_dir,'sheet1_template.xml.top')
-      with open(s_top_xml,'r') as ftop:
-        s_top = ftop.read()
-        while s_top:
-          fsheet.write(s_top)
-          s_top = ftop.read()
+    ### Copy top of base XML file to worksheet XML
+    s_top_xml = os.path.join(f2e_py_dir,'sheet1_template.xml.top')
+    ftop = open(s_top_xml,'r')
+    s_top = ftop.read()
+    while s_top:
+      fsheet.write(s_top)
+      s_top = ftop.read()
+    ftop.close()
 
-      ### Write rows into worksheet XML 
-      for dt in self.lt_data_rows:
-        fsheet.write(s_row.format(**dt))
+    ### Write rows into worksheet XML 
+    for dt in self.lt_data_rows:
+      fsheet.write(s_row.format(**dt))
 
-      ### Copy bottom of base XML file to worksheet XML
-      s_bottom_xml = os.path.join(f2e_py_dir,'sheet1_template.xml.bottom')
-      with open(s_bottom_xml,'r') as fbottom:
-        s_bottom = fbottom.read()
-        while s_bottom:
-          fsheet.write(s_bottom)
-          s_bottom = fbottom.read()
+    ### Copy bottom of base XML file to worksheet XML
+    s_bottom_xml = os.path.join(f2e_py_dir,'sheet1_template.xml.bottom')
+    fbottom = open(s_bottom_xml,'r')
+    s_bottom = fbottom.read()
+    while s_bottom:
+      fsheet.write(s_bottom)
+      s_bottom = fbottom.read()
+    fbottom.close()
 
 ### End of class FREQCSV
 ######################################################################
@@ -242,12 +248,14 @@ Arguments:
 
   ### Copy base .ZIP (no_sheet1_template_xlsx.zip) to XLSX
   s_base_zip = os.path.join(f2e_py_dir,'no_sheet1_template_xlsx.zip')
-  with open(s_base_zip,'rb') as fbase_zip:
-    with open(s_fn_xlsx,'wb') as fxlsx:
-      data = fbase_zip.read()
-      while data:
-        fxlsx.write(data)
-        data = fbase_zip.read()
+  fbase_zip = open(s_base_zip,'rb')
+  fxlsx = open(s_fn_xlsx,'wb')
+  data = fbase_zip.read()
+  while data:
+    fxlsx.write(data)
+    data = fbase_zip.read()
+  fbase_zip.close()
+  fxlsx.close()
 
   ### Add sheet 1 to XLSX ZIP archive file
   import zipfile
