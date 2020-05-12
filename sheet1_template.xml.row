@@ -1,12 +1,12 @@
     <row r="{row}" customFormat="false" ht="15" hidden="false" customHeight="false" outlineLevel="0" collapsed="false">
       <c r="A{row}" s="8" t="n">
-        <f ca="true" aca="false">(B{row}/86400/1000)+DATE(1970,1,1)</f>
+        <f aca="false">(B{row}/86400/1000)+DATE(1970,1,1)</f>
       </c>
       <c r="B{row}" s="1" t="n">
         <v>{Unix_time}</v>
       </c>
       <c r="C{row}" s="1" t="n">
-        <f ca="true" aca="false">D{row}/1000</f>
+        <f aca="false">D{row}/1000</f>
         <v>0</v>
       </c>
       <c r="D{row}" s="9" t="n">
@@ -46,22 +46,22 @@
         <v>{U_L3L1}</v>
       </c>
       <c r="P{row}" s="0" t="n">
-        <f ca="true" aca="false">E{row}*F{row}</f>
+        <f aca="false">E{row}*F{row}</f>
       </c>
       <c r="Q{row}" s="0" t="n">
-        <f ca="true" aca="false">G{row}*H{row}</f>
+        <f aca="false">G{row}*H{row}</f>
       </c>
       <c r="R{row}" s="0" t="n">
-        <f ca="true" aca="false">I{row}*J{row}</f>
+        <f aca="false">I{row}*J{row}</f>
       </c>
       <c r="S{row}" s="10" t="n">
-        <f ca="true" aca="false">SUM(P{row}:R{row})</f>
+        <f aca="false">SUM(P{row}:R{row})</f>
       </c>
       <c r="T{row}" s="2" t="n">
-        <f ca="true" aca="false">S{row}/1000</f>
+        <f aca="false">S{row}/1000</f>
       </c>
       <c r="U{row}" s="3" t="n">
-        <f ca="true" aca="false">T{row}/1000</f>
+        <f aca="false">T{row}/1000</f>
       </c>
       <c r="V{row}" s="3" t="n">
         <v>{freq}</v>
