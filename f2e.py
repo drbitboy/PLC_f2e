@@ -93,9 +93,10 @@ class FREQCSV(object):
         assert 'EVENTTIME'==csvs[0]
         assert '.' in csvs[1]
         time_toks = csvs[1].split('.')
-        time_toks[-1] = time_toks[-1][:6]
-        s_time = '.'.join(time_toks)
-        self.unix_time = (datetime.strptime(s_time,'%Y-%m-%d%H:%M:%S.%f')-datetime(1970,1,1)).total_seconds()
+        s_time = '.'.join(time_toks[:-1])
+        f_frac = float('.%s' % (time_toks[-1][:6],))
+        unix_timedelta = datetime.strptime(s_time,'%Y-%m-%d%H:%M:%S')-datetime(1970,1,1)
+        self.unix_time = (unix_timedelta.days * 864e2) + unix_timedelta.seconds + f_frac
         self.unix_time_ms = int(round(self.unix_time * 1e3))
         self.excel_date = days1970 + (self.unix_time / 86400.0)
         ### Event time is complete; clear bool for next sequence step
