@@ -43,6 +43,7 @@ xlsx_dest_dir_default = ( os.environ.get('USER','') == 'dad'
                         )
 
 try:
+  assert not ('F2E_FORCE_FILE_FAIL' in os.environ)
   f2e_py_dir = os.path.dirname(__file__)
 except:
   if do_debug:
