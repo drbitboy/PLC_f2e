@@ -188,6 +188,8 @@ class FREQCSV(object):
     else:
       fsheet.write(f2e_templates.sheet1_template_xml_bottom)
 
+    fsheet.close()
+
 ### End of class FREQCSV
 ######################################################################
 
