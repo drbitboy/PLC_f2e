@@ -1,10 +1,10 @@
 test_in.csv
 test_in.xlsx
 
-short_test_in.xlsx
+short_test_in.xlsx*
 test_out.xlsx
 short_test_out.xlsx
 
-f2e$py.class
-f2e.py?
+f2e*$py.class
+f2e*.py?
 __pycache__

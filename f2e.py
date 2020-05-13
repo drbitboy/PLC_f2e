@@ -41,8 +41,10 @@ xlsx_dest_dir_default = ( os.environ.get('USER','') == 'dad'
                        or 'C:\\Temp\\janit\\converted'
                         )
 
-try   : f2e_py_dir = os.path.dirname(__file__)
+try   : f2e_py_dir = os.path.dirname(x__file__)
 except:
+  import traceback
+  traceback.print_exc()
   f2e_py_dir = False
   import f2e_templates
 
@@ -264,14 +266,17 @@ Arguments:
   ######################################################################
 
   ### Copy base .ZIP (no_sheet1_template_xlsx.zip) to XLSX
-  s_base_zip = os.path.join(f2e_py_dir,'no_sheet1_template_xlsx.zip')
-  fbase_zip = open(s_base_zip,'rb')
   fxlsx = open(s_fn_xlsx,'wb')
-  data = fbase_zip.read()
-  while data:
-    fxlsx.write(data)
+  if f2e_py_dir:
+    s_base_zip = os.path.join(f2e_py_dir,'no_sheet1_template_xlsx.zip')
+    fbase_zip = open(s_base_zip,'rb')
     data = fbase_zip.read()
-  fbase_zip.close()
+    while data:
+      fxlsx.write(data)
+      data = fbase_zip.read()
+    fbase_zip.close()
+  else:
+    fxlsx.write(f2e_templates.no_sheet1_template_xlsx_zip)
   fxlsx.close()
 
   ### Add sheet 1 to XLSX ZIP archive file
