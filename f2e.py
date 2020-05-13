@@ -30,7 +30,8 @@ from datetime import datetime,timedelta
 
 def hdrcvt(s):
   """Convert 'l1 u' to U_L1, 'l2-l3 t' to 'T_L2L3', etc."""
-  return '{1}_{0}'.format(s[:-1].replace('-',''),s[-1])
+  return '%s_%s' % (s[-1],s[:-1].replace('-',''),)
+  #return '{1}_{0}'.format(s[:-1].replace('-',''),s[-1])
 
 ### - Destination directory for XLSX product
 ### - Directory of this file; used to find templates
@@ -40,7 +41,10 @@ xlsx_dest_dir_default = ( os.environ.get('USER','') == 'dad'
                        or 'C:\\Temp\\janit\\converted'
                         )
 
-f2e_py_dir = os.path.dirname(__file__)
+try   : f2e_py_dir = os.path.dirname(__file__)
+except:
+  f2e_py_dir = False
+  import f2e_templates
 
 do_debug = 'DEBUG' in os.environ
 
@@ -140,36 +144,46 @@ class FREQCSV(object):
   def write_sheet1(self,fn_sheet1):
     """Write parsed CSV data to XLSX worksheet as XML"""
 
-    ### Read row format statement into string
-    s_row_xml = os.path.join(f2e_py_dir,'sheet1_template.xml.row')
-    frow = open(s_row_xml,'r')
-    s_row = frow.read()
-    assert not frow.read()
-    frow.close()
+    if f2e_py_dir:
+      ### Read row format statement into string
+      s_row_xml = os.path.join(f2e_py_dir,'sheet1_template.xml.row')
+      frow = open(s_row_xml,'r')
+      s_row = frow.read()
+      assert not frow.read()
+      frow.close()
+    else:
+      s_row = f2e_templates.sheet1_template_xml_row
 
     fsheet = open(fn_sheet1,'w')
 
-    ### Copy top of base XML file to worksheet XML
-    s_top_xml = os.path.join(f2e_py_dir,'sheet1_template.xml.top')
-    ftop = open(s_top_xml,'r')
-    s_top = ftop.read()
-    while s_top:
-      fsheet.write(s_top)
+    if f2e_py_dir:
+      ### Copy top of base XML file to worksheet XML
+      s_top_xml = os.path.join(f2e_py_dir,'sheet1_template.xml.top')
+      ftop = open(s_top_xml,'r')
       s_top = ftop.read()
-    ftop.close()
+      while s_top:
+        fsheet.write(s_top)
+        s_top = ftop.read()
+      ftop.close()
+    else:
+      fsheet.write(f2e_templates.sheet1_template_xml_top)
 
     ### Write rows into worksheet XML 
     for dt in self.lt_data_rows:
-      fsheet.write(s_row.format(**dt))
+      fsheet.write(s_row % dt)
+      #fsheet.write(s_row.format(**dt))
 
-    ### Copy bottom of base XML file to worksheet XML
-    s_bottom_xml = os.path.join(f2e_py_dir,'sheet1_template.xml.bottom')
-    fbottom = open(s_bottom_xml,'r')
-    s_bottom = fbottom.read()
-    while s_bottom:
-      fsheet.write(s_bottom)
+    if f2e_py_dir:
+      ### Copy bottom of base XML file to worksheet XML
+      s_bottom_xml = os.path.join(f2e_py_dir,'sheet1_template.xml.bottom')
+      fbottom = open(s_bottom_xml,'r')
       s_bottom = fbottom.read()
-    fbottom.close()
+      while s_bottom:
+        fsheet.write(s_bottom)
+        s_bottom = fbottom.read()
+      fbottom.close()
+    else:
+      fsheet.write(f2e_templates.sheet1_template_xml_bottom)
 
 ### End of class FREQCSV
 ######################################################################
@@ -191,10 +205,12 @@ Arguments:
   s_fn_xlsx_arg       - Path to output XLSX file (optional)
   s_dn_out_arg        - Directory where XLSX file should be written, if
                         argument s_fn_xlsx_arg was not supplied
-                        - Default is [{0}]
+                        - Default is [%s]
   s_fn_sheet1_xml_arg - Name of temporary XML file (optional)
 
-  """.format(xlsx_dest_dir_default)
+  """ % (xlsx_dest_dir_default,)
+  ###                      - Default is [%s]
+  ###""".format(xlsx_dest_dir_default)
 
   ######################################################################
   ### Part 1:  input argument handling
@@ -218,7 +234,8 @@ Arguments:
 
     ### Exit if nothing useful was provided
     if not (s_fn_csv and os.path.isfile(s_fn_csv)):
-      sys.stderr.write('CSV file either not found or not provided:  [{0}]\n'.format(s_fn_csv))
+      sys.stderr.write('CSV file either not found or not provided:  [%s]\n' % (s_fn_csv,))
+      ###sys.stderr.write('CSV file either not found or not provided:  [{0}]\n'.format(s_fn_csv))
       return
 
   ### Build default XLSX filename, if s_fn_xlsx_art  was not provided

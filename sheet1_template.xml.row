@@ -1,72 +1,72 @@
-    <row r="{row}" customFormat="false" ht="15" hidden="false" customHeight="false" outlineLevel="0" collapsed="false">
-      <c r="A{row}" s="8" t="n">
-        <f aca="false">(B{row}/86400/1000)+DATE(1970,1,1)</f>
+    <row r="%(row)s" customFormat="false" ht="15" hidden="false" customHeight="false" outlineLevel="0" collapsed="false">
+      <c r="A%(row)s" s="8" t="n">
+        <f aca="false">(B%(row)s/86400/1000)+DATE(1970,1,1)</f>
       </c>
-      <c r="B{row}" s="1" t="n">
-        <v>{Unix_time}</v>
+      <c r="B%(row)s" s="1" t="n">
+        <v>%(Unix_time)s</v>
       </c>
-      <c r="C{row}" s="1" t="n">
-        <f aca="false">D{row}/1000</f>
+      <c r="C%(row)s" s="1" t="n">
+        <f aca="false">D%(row)s/1000</f>
         <v>0</v>
       </c>
-      <c r="D{row}" s="9" t="n">
-        <v>{uS}</v>
+      <c r="D%(row)s" s="9" t="n">
+        <v>%(uS)s</v>
       </c>
-      <c r="E{row}" s="9" t="n">
-        <v>{U_L1}</v>
+      <c r="E%(row)s" s="9" t="n">
+        <v>%(U_L1)s</v>
       </c>
-      <c r="F{row}" s="9" t="n">
-        <v>{I_L1}</v>
+      <c r="F%(row)s" s="9" t="n">
+        <v>%(I_L1)s</v>
       </c>
-      <c r="G{row}" s="9" t="n">
-        <v>{U_L2}</v>
+      <c r="G%(row)s" s="9" t="n">
+        <v>%(U_L2)s</v>
       </c>
-      <c r="H{row}" s="9" t="n">
-        <v>{I_L2}</v>
+      <c r="H%(row)s" s="9" t="n">
+        <v>%(I_L2)s</v>
       </c>
-      <c r="I{row}" s="9" t="n">
-        <v>{U_L3}</v>
+      <c r="I%(row)s" s="9" t="n">
+        <v>%(U_L3)s</v>
       </c>
-      <c r="J{row}" s="9" t="n">
-        <v>{I_L3}</v>
+      <c r="J%(row)s" s="9" t="n">
+        <v>%(I_L3)s</v>
       </c>
-      <c r="K{row}" s="9" t="n">
-        <v>{U_L4}</v>
+      <c r="K%(row)s" s="9" t="n">
+        <v>%(U_L4)s</v>
       </c>
-      <c r="L{row}" s="9" t="n">
-        <v>{I_L4}</v>
+      <c r="L%(row)s" s="9" t="n">
+        <v>%(I_L4)s</v>
       </c>
-      <c r="M{row}" s="9" t="n">
-        <v>{U_L1L2}</v>
+      <c r="M%(row)s" s="9" t="n">
+        <v>%(U_L1L2)s</v>
       </c>
-      <c r="N{row}" s="9" t="n">
-        <v>{U_L2L3}</v>
+      <c r="N%(row)s" s="9" t="n">
+        <v>%(U_L2L3)s</v>
       </c>
-      <c r="O{row}" s="9" t="n">
-        <v>{U_L3L1}</v>
+      <c r="O%(row)s" s="9" t="n">
+        <v>%(U_L3L1)s</v>
       </c>
-      <c r="P{row}" s="0" t="n">
-        <f aca="false">E{row}*F{row}</f>
+      <c r="P%(row)s" s="0" t="n">
+        <f aca="false">E%(row)s*F%(row)s</f>
       </c>
-      <c r="Q{row}" s="0" t="n">
-        <f aca="false">G{row}*H{row}</f>
+      <c r="Q%(row)s" s="0" t="n">
+        <f aca="false">G%(row)s*H%(row)s</f>
       </c>
-      <c r="R{row}" s="0" t="n">
-        <f aca="false">I{row}*J{row}</f>
+      <c r="R%(row)s" s="0" t="n">
+        <f aca="false">I%(row)s*J%(row)s</f>
       </c>
-      <c r="S{row}" s="10" t="n">
-        <f aca="false">SUM(P{row}:R{row})</f>
+      <c r="S%(row)s" s="10" t="n">
+        <f aca="false">SUM(P%(row)s:R%(row)s)</f>
       </c>
-      <c r="T{row}" s="2" t="n">
-        <f aca="false">S{row}/1000</f>
+      <c r="T%(row)s" s="2" t="n">
+        <f aca="false">S%(row)s/1000</f>
       </c>
-      <c r="U{row}" s="3" t="n">
-        <f aca="false">T{row}/1000</f>
+      <c r="U%(row)s" s="3" t="n">
+        <f aca="false">T%(row)s/1000</f>
       </c>
-      <c r="V{row}" s="3" t="n">
-        <v>{freq}</v>
+      <c r="V%(row)s" s="3" t="n">
+        <v>%(freq)s</v>
       </c>
-      <c r="W{row}" s="0" t="n">
-        <v>{count}</v>
+      <c r="W%(row)s" s="0" t="n">
+        <v>%(count)s</v>
       </c>
     </row>
