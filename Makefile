@@ -1,5 +1,5 @@
 
-f2e_templates.py: sheet1_template.xml.bottom sheet1_template.xml.row sheet1_template.xml.top
+f2e_templates.py: sheet1_template.xml.bottom sheet1_template.xml.row sheet1_template.xml.top Makefile
 	( echo -n 'sheet1_template_xml_bottom="""' \
 	; cat sheet1_template.xml.bottom \
 	; echo '"""' \
@@ -12,8 +12,13 @@ f2e_templates.py: sheet1_template.xml.bottom sheet1_template.xml.row sheet1_temp
 	; cat sheet1_template.xml.top \
 	; echo '"""' \
 	\
-	; ( echo 'no_sheet1_template_xlsx_zip=(' \
-	  ; echo "print((open('no_sheet1_template_xlsx.zip','rb').read(10000),))" | python \
+	; ( echo 'try:' \
+	  ; echo '  no_sheet1_template_xlsx_zip=bytes(' \
+	  ; echo "print((open('no_sheet1_template_xlsx.zip','rb').read(10000),))" | python | sed "s/^(b'/('/" \
+	  ; echo "[0],encoding='latin1')" \
+	  ; echo 'except:' \
+	  ; echo '  no_sheet1_template_xlsx_zip=(' \
+	  ; echo "print((open('no_sheet1_template_xlsx.zip','rb').read(10000),))" | python | sed "s/^(b'/('/" \
 	  ; echo '[0])' \
 	  ) \
 	) > $@
