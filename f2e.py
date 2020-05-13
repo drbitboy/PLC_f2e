@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-#!/usr/bin/env jython?
 """
 
 Usage (BASH, typical):
@@ -31,24 +30,26 @@ from datetime import datetime,timedelta
 def hdrcvt(s):
   """Convert 'l1 u' to U_L1, 'l2-l3 t' to 'T_L2L3', etc."""
   return '%s_%s' % (s[-1],s[:-1].replace('-',''),)
-  #return '{1}_{0}'.format(s[:-1].replace('-',''),s[-1])
 
+### - Debugging (if envvar DEBUG exists, XML file will not be deleted)
 ### - Destination directory for XLSX product
 ### - Directory of this file; used to find templates
-### - Debugging (if envvar DEBUG exists, XML file will not be deleted)
+
+do_debug = 'DEBUG' in os.environ
+
 xlsx_dest_dir_default = ( os.environ.get('USER','') == 'dad'
                       and '.'
                        or 'C:\\Temp\\janit\\converted'
                         )
 
-try   : f2e_py_dir = os.path.dirname(x__file__)
+try:
+  f2e_py_dir = os.path.dirname(__file__)
 except:
-  import traceback
-  traceback.print_exc()
-  f2e_py_dir = False
+  if do_debug:
+    import traceback
+    traceback.print_exc()
+  f2e_py_dir = None
   import f2e_templates
-
-do_debug = 'DEBUG' in os.environ
 
 ########################################################################
 ### - Constants, default headers
@@ -147,19 +148,21 @@ class FREQCSV(object):
   def write_sheet1(self,fn_sheet1):
     """Write parsed CSV data to XLSX worksheet as XML"""
 
-    if f2e_py_dir:
+    if None is f2e_py_dir:
+      s_row = f2e_templates.sheet1_template_xml_row
+    else:
       ### Read row format statement into string
       s_row_xml = os.path.join(f2e_py_dir,'sheet1_template.xml.row')
       frow = open(s_row_xml,'r')
       s_row = frow.read()
       assert not frow.read()
       frow.close()
-    else:
-      s_row = f2e_templates.sheet1_template_xml_row
 
     fsheet = open(fn_sheet1,'w')
 
-    if f2e_py_dir:
+    if None is f2e_py_dir:
+      fsheet.write(f2e_templates.sheet1_template_xml_top)
+    else:
       ### Copy top of base XML file to worksheet XML
       s_top_xml = os.path.join(f2e_py_dir,'sheet1_template.xml.top')
       ftop = open(s_top_xml,'r')
@@ -168,15 +171,14 @@ class FREQCSV(object):
         fsheet.write(s_top)
         s_top = ftop.read()
       ftop.close()
-    else:
-      fsheet.write(f2e_templates.sheet1_template_xml_top)
 
     ### Write rows into worksheet XML 
     for dt in self.lt_data_rows:
       fsheet.write(s_row % dt)
-      #fsheet.write(s_row.format(**dt))
 
-    if f2e_py_dir:
+    if None is f2e_py_dir:
+      fsheet.write(f2e_templates.sheet1_template_xml_bottom)
+    else:
       ### Copy bottom of base XML file to worksheet XML
       s_bottom_xml = os.path.join(f2e_py_dir,'sheet1_template.xml.bottom')
       fbottom = open(s_bottom_xml,'r')
@@ -185,8 +187,6 @@ class FREQCSV(object):
         fsheet.write(s_bottom)
         s_bottom = fbottom.read()
       fbottom.close()
-    else:
-      fsheet.write(f2e_templates.sheet1_template_xml_bottom)
 
     fsheet.close()
 
@@ -240,7 +240,6 @@ Arguments:
     ### Exit if nothing useful was provided
     if not (s_fn_csv and os.path.isfile(s_fn_csv)):
       sys.stderr.write('CSV file either not found or not provided:  [%s]\n' % (s_fn_csv,))
-      ###sys.stderr.write('CSV file either not found or not provided:  [{0}]\n'.format(s_fn_csv))
       return
 
   ### Build default XLSX filename, if s_fn_xlsx_art  was not provided
@@ -270,7 +269,9 @@ Arguments:
 
   ### Copy base .ZIP (no_sheet1_template_xlsx.zip) to XLSX
   fxlsx = open(s_fn_xlsx,'wb')
-  if f2e_py_dir:
+  if None is f2e_py_dir:
+    fxlsx.write(f2e_templates.no_sheet1_template_xlsx_zip)
+  else:
     s_base_zip = os.path.join(f2e_py_dir,'no_sheet1_template_xlsx.zip')
     fbase_zip = open(s_base_zip,'rb')
     data = fbase_zip.read()
@@ -278,8 +279,6 @@ Arguments:
       fxlsx.write(data)
       data = fbase_zip.read()
     fbase_zip.close()
-  else:
-    fxlsx.write(f2e_templates.no_sheet1_template_xlsx_zip)
   fxlsx.close()
 
   ### Add sheet 1 to XLSX ZIP archive file
