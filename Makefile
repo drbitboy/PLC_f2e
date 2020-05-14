@@ -1,5 +1,5 @@
 
-f2e_templates.py: sheet1_template.xml.bottom sheet1_template.xml.row sheet1_template.xml.top Makefile
+f2e_templates.py: sheet1_template.xml.bottom sheet1_template.xml.row sheet1_template.xml.top Makefile no_sheet1_template_xlsx.zip
 	( echo '###START_OF_F2E_TEMPLATES_PY' \
 	\
 	; echo -n 'sheet1_template_xml_bottom="""' \
